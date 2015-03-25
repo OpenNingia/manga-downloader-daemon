@@ -2,12 +2,15 @@
 __author__ = 'Daniele Simonetti'
 
 import os
+import sys
 import json
 import time
 import shutil
+import pyprind
 import requests
 
 from bll.corruptiondetect import is_image_corrupted
+
 
 class MangaItem(object):
 
@@ -68,9 +71,17 @@ class DownloadProfiler(object):
     def add(self, count):
         self.downloaded += count
 
-    def bytes_per_seconds(self):
-        elapsed = self.end_time - self.time
+    def bytes_per_seconds(self, partial=False):
+        elapsed = 0
+        if partial:
+            elapsed = time.clock() - self.time
+        else:
+            elapsed = self.end_time - self.time
+
+        if elapsed == 0:
+            return 0
         return self.downloaded / elapsed
+
 
 class GenericProvider(object):
     def __init__(self):
@@ -78,6 +89,8 @@ class GenericProvider(object):
         self.cache_ = os.path.expanduser("~/.mangadd/providers/" + self.name + '/mangalist.json')
         self.profiler = DownloadProfiler()
         self.load_cached_manga_list()
+
+        self.progress_text = ''
 
     @property
     def mangalist(self):
@@ -128,6 +141,8 @@ class GenericProvider(object):
 
         for i, pg in enumerate(chapter.pages):
 
+            self.progress_text = 'page {} of {}'.format(i, len(chapter.pages))
+
             image_path = os.path.join(chapter_dir,
                                       settings.appcfg.page_fmt.format(pg=i))
 
@@ -146,11 +161,19 @@ class GenericProvider(object):
             return True
 
         retries = 0
+        pbar = None
 
         while True:
 
             r = requests.get(url, stream=True)
             if r.status_code == 200:
+
+                try:
+                    pbar = pyprind.ProgBar(int(r.headers['content-length']),
+                                           title=self.progress_text)
+
+                except:
+                    pbar = None
 
                 self.profiler.begin()
 
@@ -158,6 +181,14 @@ class GenericProvider(object):
                     for chunk in r.iter_content():
                         f.write(chunk)
                         self.profiler.add(len(chunk))
+
+                        #sys.stdout.write(
+                        #    '{} KB/s\r'.format(
+                        #        int(self.profiler.bytes_per_seconds(True)/1024)))
+                        if pbar:
+                            pbar.update(len(chunk))
+
+                        #sys.stdout.flush()
 
                 self.profiler.end()
 
@@ -173,8 +204,8 @@ class GenericProvider(object):
 
             retries += 1
 
-        print('downloaded page: {}, speed: {:G} Kb/s'.format(url,
-              self.profiler.bytes_per_seconds()/1024))
+        #print('downloaded page: {}, speed: {:G} Kb/s'.format(url,
+        #      self.profiler.bytes_per_seconds()/1024))
         return True
 
     def update_manga_list(self):
