@@ -39,8 +39,8 @@ to overwrite default configuration settings.
 ```json
 {
     "download_dir": "/home/downloads/manga",
-    "chapter_fmt": "{ch:00000}",
-    "volume_dir_fmt": "[VOL {voln:000}] {manga}"
+    "chapter_fmt": "{ch:05G}",
+    "volume_dir_fmt": "[VOL {voln:03G}] {manga}"
 }
 ```
 
@@ -60,3 +60,4 @@ root >
             ...
     another_manga >
         ...
+```
