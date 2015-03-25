@@ -3,7 +3,11 @@ __author__ = 'Daniele Simonetti'
 
 import os
 import json
+import time
+import shutil
 import requests
+
+from bll.corruptiondetect import is_image_corrupted
 
 class MangaItem(object):
 
@@ -48,10 +52,31 @@ class ChapterItem(object):
         return self._page_cache
 
 
+class DownloadProfiler(object):
+    def __init__(self):
+        self.time = None
+        self.end_time = None
+        self.downloaded = 0
+
+    def begin(self):
+        self.time = time.clock()
+        self.downloaded = 0
+
+    def end(self):
+        self.end_time = time.clock()
+
+    def add(self, count):
+        self.downloaded += count
+
+    def bytes_per_seconds(self):
+        elapsed = self.end_time - self.time
+        return self.downloaded / elapsed
+
 class GenericProvider(object):
     def __init__(self):
         self.manga_list_ = []
         self.cache_ = os.path.expanduser("~/.mangadd/providers/" + self.name + '/mangalist.json')
+        self.profiler = DownloadProfiler()
         self.load_cached_manga_list()
 
     @property
@@ -89,6 +114,8 @@ class GenericProvider(object):
     def download_chapter(self, chapter, settings):
         """download all missing pages from chapter"""
 
+        print('downloading chapter: {}'.format(chapter.nbr))
+
         manga_dir = os.path.join(settings.appcfg.download_dir,
                                  chapter.manga.name)
 
@@ -111,13 +138,44 @@ class GenericProvider(object):
 
         ext = url.rpartition('.')[2]
 
-        r = requests.get(url, stream=True)
-        if r.status_code == 200:
-            with open("{}.{}".format(save_path, ext), 'wb') as f:
-                for chunk in r.iter_content():
-                    f.write(chunk)
-        else:
-            print('cannot download image from', url)
+        image_path = "{}.{}".format(save_path, ext)
+        image_downloading_path = "{}.mdd".format(image_path, ext)
+
+        # assume already downloaded
+        if os.path.exists(image_path):
+            return True
+
+        retries = 0
+
+        while True:
+
+            r = requests.get(url, stream=True)
+            if r.status_code == 200:
+
+                self.profiler.begin()
+
+                with open(image_downloading_path, 'wb') as f:
+                    for chunk in r.iter_content():
+                        f.write(chunk)
+                        self.profiler.add(len(chunk))
+
+                self.profiler.end()
+
+                # if image is not corrupted
+                # remove downloading extension
+                if not is_image_corrupted(image_downloading_path):
+                    shutil.move(image_downloading_path, image_path)
+                    break
+
+            if retries > 3:
+                print('cannot download image from', url)
+                return False
+
+            retries += 1
+
+        print('downloaded page: {}, speed: {:G} Kb/s'.format(url,
+              self.profiler.bytes_per_seconds()/1024))
+        return True
 
     def update_manga_list(self):
 

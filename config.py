@@ -21,8 +21,11 @@ class SettingsReader(object):
             print('parsing config file', jf)
             if fn == 'config.json':
                 self.appcfg = AppSettingsReader(jf)
-            else:
-                self.manga_cfg.append(MangaSettingsReader(jf))
+
+        for jf in glob.glob(self.appdir + "/manga/*.json"):
+            fn = os.path.basename(jf)
+            print('parsing manga config file', jf)
+            self.manga_cfg.append(MangaSettingsReader(jf))
 
 
 class AppSettingsReader(object):

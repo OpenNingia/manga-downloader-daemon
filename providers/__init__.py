@@ -10,6 +10,13 @@ def by_name(nm):
     return None
 
 
+def by_url(url):
+    for p in PROVIDER_MAP.values():
+        if p.url in url:
+            return p
+    return None
+
+
 def init_providers():
     from providers.mangareader import MangaReader
     PROVIDER_MAP['mangareader'] = MangaReader()

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 __author__ = 'Daniele Simonetti'
 
+
 import os
 import re
 import requests
@@ -14,8 +15,8 @@ class MangaReader(GenericProvider):
         super(MangaReader, self).__init__()
 
         self.chre = [
-            re.compile(r"/(?P<nbr>\d)"),
-            re.compile(r"/chapter-(?P<nbr>\d)")
+            re.compile(r"/(?P<nbr>\d+)"),
+            re.compile(r"/chapter-(?P<nbr>\d+)")
         ]
 
     @property
@@ -64,7 +65,6 @@ class MangaReader(GenericProvider):
         return cl
 
 
-
     def get_chapter_pages(self, chapter):
         pg = []
 
@@ -103,7 +103,8 @@ class MangaReader(GenericProvider):
 
             try:
                 m = rx.search(url)
-                if not m: return None
+                if not m:
+                    return None
                 return int(m.groups('nbr')[0])
             except Exception as e:
                 return None
@@ -113,6 +114,4 @@ class MangaReader(GenericProvider):
             if result:
                 return result
         return 0
-
-
 
