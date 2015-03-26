@@ -6,8 +6,13 @@ import sys
 import json
 import time
 import shutil
-import pyprind
 import requests
+
+# pyprind is optional
+try:
+    import pyprind
+except:
+    pass
 
 from bll.corruptiondetect import is_image_corrupted
 
@@ -165,38 +170,42 @@ class GenericProvider(object):
 
         while True:
 
-            r = requests.get(url, stream=True)
-            if r.status_code == 200:
+            try:
+                r = requests.get(url, stream=True)
+                if r.status_code == 200:
 
-                try:
-                    pbar = pyprind.ProgBar(int(r.headers['content-length']),
-                                           title=self.progress_text)
+                    try:
+                        pbar = pyprind.ProgBar(int(r.headers['content-length']),
+                                               title=self.progress_text)
+                    except:
+                        pbar = None
 
-                except:
-                    pbar = None
+                    self.profiler.begin()
 
-                self.profiler.begin()
+                    with open(image_downloading_path, 'wb') as f:
+                        for chunk in r.iter_content():
+                            f.write(chunk)
+                            self.profiler.add(len(chunk))
 
-                with open(image_downloading_path, 'wb') as f:
-                    for chunk in r.iter_content():
-                        f.write(chunk)
-                        self.profiler.add(len(chunk))
+                            #sys.stdout.write(
+                            #    '{} KB/s\r'.format(
+                            #        int(self.profiler.bytes_per_seconds(True)/1024)))
+                            if pbar:
+                                pbar.update(len(chunk))
 
-                        #sys.stdout.write(
-                        #    '{} KB/s\r'.format(
-                        #        int(self.profiler.bytes_per_seconds(True)/1024)))
-                        if pbar:
-                            pbar.update(len(chunk))
+                            #sys.stdout.flush()
 
-                        #sys.stdout.flush()
+                    self.profiler.end()
 
-                self.profiler.end()
+                    # if image is not corrupted
+                    # remove downloading extension
+                    # and exit the cycle
+                    if not is_image_corrupted(image_downloading_path):
+                        shutil.move(image_downloading_path, image_path)
+                        break
 
-                # if image is not corrupted
-                # remove downloading extension
-                if not is_image_corrupted(image_downloading_path):
-                    shutil.move(image_downloading_path, image_path)
-                    break
+            except Exception as e:
+                print('download error: {}'.format(e))
 
             if retries > 3:
                 print('cannot download image from', url)
