@@ -1,3 +1,9 @@
+var postback = ''
+
+var set_postback_host = function(pb) {
+	postback = pb;
+}
+
 // create our editable grid
 //
 var editableGrid = new EditableGrid("JobGrid", {
@@ -26,7 +32,7 @@ window.onload = function() {
 		maxBars: 10
 	});*/
 
-	editableGrid.onloadJSON("http://localhost:8888/jobs/listex");
+	editableGrid.onloadJSON(postback + "/jobs/listex");
 	setRefreshTimeout();
 }
 
@@ -37,7 +43,7 @@ function setRefreshTimeout()
 {
 	refreshTimeout = setTimeout(
 						function() {
-	      					editableGrid.onloadJSON("http://localhost:8888/jobs/listex");
+	      					editableGrid.onloadJSON(postback + "/jobs/listex");
 	      					setRefreshTimeout();
 						}, refreshInterval * 1000);
 }

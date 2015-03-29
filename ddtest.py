@@ -48,7 +48,14 @@ def job_status_to_string(stat):
 
 class IndexHandler(tornado.web.RequestHandler):
     def get(self):
-        self.render('index.html')
+
+        proto = self.request.protocol
+        host = self.request.host
+        port = self.request.port
+
+        pbhost = "{}://{}:{}".format(proto, host, port)
+
+        self.render('index.html', postback_host=pbhost)
 
 
 class JobListHandler(tornado.web.RequestHandler):
