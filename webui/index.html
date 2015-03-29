@@ -1,0 +1,183 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>Manga Downloader Daemon WEBUI</title>
+
+		<!-- include javascript and css files for the EditableGrid library -->
+		<script src="{{ static_url("editablegrid/editablegrid.js") }}"></script>
+		<script src="{{ static_url("editablegrid/editablegrid_utils.js") }}" ></script>
+		<script src="{{ static_url("editablegrid/editablegrid_renderers.js") }}" ></script>
+		<script src="{{ static_url("editablegrid/editablegrid_editors.js") }}" ></script>
+		<script src="{{ static_url("editablegrid/editablegrid_validators.js") }}" ></script>
+		<!-- [DO NOT DEPLOY]  <script src="editablegrid/editablegrid_renderers.js" ></script>-->
+		<!-- [DO NOT DEPLOY]  <script src="editablegrid/editablegrid_editors.js" ></script>-->
+		<!-- [DO NOT DEPLOY] <script src="editablegrid/editablegrid_validators.js" ></script>-->
+		<!-- [DO NOT DEPLOY] <script src="editablegrid/editablegrid_utils.js" ></script> -->
+		<!-- [DO NOT DEPLOY]<script src="editablegrid/editablegrid_charts.js" ></script> -->
+		<link rel="stylesheet" href="{{ static_url("editablegrid/editablegrid.css") }}" type="text/css" media="screen">
+
+		<!-- include javascript and css files for jQuery, needed for the datepicker and autocomplete extensions -->
+		<script src="{{ static_url("editablegrid/extensions/jquery/jquery-1.6.4.min.js") }}" ></script>
+		<script src="{{ static_url("editablegrid/extensions/jquery/jquery-ui-1.8.16.custom.min.js") }}" ></script>
+
+		<link rel="stylesheet" href="{{ static_url("editablegrid/extensions/jquery/jquery-ui-1.8.16.custom.css") }}" type="text/css" media="screen">
+
+		<!-- include javascript and css files for the autocomplete extension -->
+		<!-- <script src="editablegrid/extensions/autocomplete/autocomplete.js" ></script> -->
+		<!-- <link rel="stylesheet" href="editablegrid/extensions/autocomplete/autocomplete.css" type="text/css" media="screen"> -->
+
+		<!-- Uncomment this if you want to use the first variant of the autocomplete instead of the official one from jQuery UI -->
+		<!--
+		<script src="editablegrid/extensions/autocomplete_variant_1/jquery.autocomplete.min.js" ></script>
+		<script src="editablegrid/extensions/autocomplete_variant_1/autocomplete.js" ></script>
+		<link rel="stylesheet" href="editablegrid/extensions/autocomplete_variant_1/jquery.autocomplete.css" type="text/css" media="screen">
+		!-->
+
+		<!-- Uncomment this if you want to use the second variant of the autocomplete instead of the official one from jQuery UI -->
+		<!--
+		<script src="editablegrid/extensions/autocomplete_variant_2/jquery.autocomplete.min.js" ></script>
+		<script src="editablegrid/extensions/autocomplete_variant_2/autocomplete.js" ></script>
+		<link rel="stylesheet" href="editablegrid/extensions/autocomplete_variant_2/jquery.autocomplete.css" type="text/css" media="screen">
+		!-->
+
+		<!-- include javascript file for the Highcharts library -->
+		<!-- <script src="editablegrid/extensions/Highcharts-4.0.4/js/highcharts.js"></script> -->
+
+		<!-- include javascript and css files for this demo -->
+
+		<script src="{{ static_url("app/app.js") }}"></script>
+		<link rel="stylesheet" type="text/css" href="{{ static_url("css/webui.css") }}" media="screen"/>
+		<link rel="stylesheet" type="text/css" href="{{ static_url("css/toolbar.css") }}" media="screen"/>
+		<link rel="stylesheet" type="text/css" href="{{ static_url("css/modal.css") }}" media="screen"/>
+		<link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.6.0/pure-min.css">
+
+	</head>
+
+	<body>
+
+		<div class="toolbar">
+			<nav>
+				<p>Tool Bar</p>
+				<ul>
+					<li><a href="#">Add</a></li>
+					<li><a href="#">Remove</a></li>
+					<li><a href="#">Start</a></li>
+					<li><a href="#">Pause</a></li>
+					<li><a href="#">Stop</a></li>
+				</ul>
+			</nav>
+		</div>
+
+		<div id="wrap">
+		<h1>Job List</h1>
+
+			<!-- Feedback message zone -->
+			<div id="message"></div>
+
+			<!--  Number of rows per page -->
+			<div id="pagecontrol">
+				<label for="pagecontrol">Rows per page: </label>
+				<select id="pagesize" name="pagesize">
+					<option value="5">5</option>
+					<option value="10">10</option>
+					<option value="15">15</option>
+					<option value="20">20</option>
+					<option value="25">25</option>
+					<option value="30">30</option>
+					<option value="40">40</option>
+					<option value="50">50</option>
+				</select>
+				&nbsp;&nbsp;
+
+				<!--  Refresh interval -->
+				<label for="refresh">Refresh interval:</label>
+				<select id="refresh" name="refresh">
+					<option value="5">5 sec.</option>
+					<option value="10">10 sec.</option>
+					<option value="15">15 sec.</option>
+					<option value="20">20 sec.</option>
+					<option value="25">25 sec.</option>
+					<option value="30">30 sec.</option>
+					<option value="40">40 sec.</option>
+					<option value="50">50 sec.</option>
+					<option value="50">60 sec.</option>
+				</select>
+			</div>
+
+			<!-- Grid filter -->
+			<label for="filter">Filter :</label>
+			<input type="text" id="filter"/>
+
+			<!-- Grid contents -->
+			<div id="tablecontent"></div>
+
+			<!-- Paginator control -->
+			<div id="paginator"></div>
+
+			<!-- Edition zone (to demonstrate the "fixed" editor mode) -->
+			<div id="edition"></div>
+
+			<!-- Charts zone -->
+			<div id="barchartcontent"></div>
+			<div id="piechartcontent"></div>
+
+			<a href="#modal-add-job" class="btn btn-big">Add job!</a>
+		</div>
+
+        <!-- Modal -->
+        <div class="modal" id="modal-add-job" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-header">
+              <h2>Add new job</h2>
+
+                <form class="pure-form pure-form-aligned">
+                    <fieldset>
+                        <div class="pure-control-group">
+                            <label for="url">URL</label>
+                            <input id="url" type="text" placeholder="http://manga/url.html">
+                        </div>
+
+                        <div class="pure-control-group">
+                            <label for="from">From</label>
+                            <input id="from" type="number" placeholder="1">
+                        </div>
+
+                        <div class="pure-control-group">
+                            <label for="email">Email Address</label>
+                            <input id="email" type="email" placeholder="Email Address">
+                        </div>
+
+                        <div class="pure-control-group">
+                            <label for="foo">Supercalifragilistic Label</label>
+                            <input id="foo" type="text" placeholder="Enter something here...">
+                        </div>
+
+                        <div class="pure-controls">
+                            <label for="cb" class="pure-checkbox">
+                                <input id="cb" type="checkbox"> I've read the terms and conditions
+                            </label>
+
+                            <button type="submit" class="pure-button pure-button-primary">Submit</button>
+                        </div>
+                    </fieldset>
+                </form>
+
+              <a href="#close" class="btn-close" aria-hidden="true">×</a> <!--CHANGED TO "#close"-->
+            </div>
+            <div class="modal-body">
+              <p>One modal example here! :D</p>
+            </div>
+            <div class="modal-footer">
+              <a href="#close" class="btn">Nice!</a>  <!--CHANGED TO "#close"-->
+            </div>
+            </div>
+          </div>
+        </div>
+        <!-- /Modal -->
+
+	</body>
+
+</html>

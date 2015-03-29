@@ -18,14 +18,14 @@ class SettingsReader(object):
         for jf in glob.glob(self.appdir + "/*.json"):
             fn = os.path.basename(jf)
 
-            print('parsing config file', jf)
+        #    print('parsing config file', jf)
             if fn == 'config.json':
                 self.appcfg = AppSettingsReader(jf)
 
-        for jf in glob.glob(self.appdir + "/manga/*.json"):
-            fn = os.path.basename(jf)
-            print('parsing manga config file', jf)
-            self.manga_cfg.append(MangaSettingsReader(jf))
+        #for jf in glob.glob(self.appdir + "/manga/*.json"):
+        #    fn = os.path.basename(jf)
+        #    print('parsing manga config file', jf)
+        #    self.manga_cfg.append(MangaSettingsReader(jf))
 
 
 class AppSettingsReader(object):
@@ -43,7 +43,7 @@ class AppSettingsReader(object):
             raise Exception('app config not found')
 
         self.download_dir = os.path.expanduser("~/.mangadd/downloads")
-        self.chapter_fmt = "{ch:05G}"
+        self.chapter_fmt = "{ch:05G} - {nm}"
         self.page_fmt = "{pg:05G}"
         self.volume_dir_fmt = "[VOL {voln:03G}] {manga}"
 
@@ -59,11 +59,11 @@ class AppSettingsReader(object):
             if 'volume_dir_fmt' in jd:
                 self.volume_dir_fmt = jd['volume_dir_fmt']
 
-        print('download dir', self.download_dir)
-        print('chapter format', self.chapter_fmt,
-              'example. ch 1', self.chapter_fmt.format(ch=1))
-        print('volume format', self.volume_dir_fmt,
-              'example. vol 1', self.volume_dir_fmt.format(voln=1, manga='Naruto'))
+        # print('download dir', self.download_dir)
+        # print('chapter format', self.chapter_fmt,
+        #      'example. ch 1', self.chapter_fmt.format(ch=1, nm='intro'))
+        # print('volume format', self.volume_dir_fmt,
+        #      'example. vol 1', self.volume_dir_fmt.format(voln=1, manga='Naruto'))
 
 
 class MangaSettingsReader(object):

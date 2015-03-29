@@ -4,9 +4,12 @@ __author__ = 'Daniele Simonetti'
 import os
 import sys
 import json
+import util
 import time
 import shutil
 import requests
+
+from jobs.manager import JobManager
 
 # pyprind is optional
 try:
@@ -91,7 +94,10 @@ class DownloadProfiler(object):
 class GenericProvider(object):
     def __init__(self):
         self.manga_list_ = []
-        self.cache_ = os.path.expanduser("~/.mangadd/providers/" + self.name + '/mangalist.json')
+        self.cache_ = os.path.expanduser(
+            "~/.mangadd/providers/"
+            + self.name
+            + '/mangalist.json')
         self.profiler = DownloadProfiler()
         self.load_cached_manga_list()
 
@@ -129,17 +135,24 @@ class GenericProvider(object):
         for c in manga.chapters:
             self.download_chapter(c, settings)
 
-    def download_chapter(self, chapter, settings):
+    def download_chapter(self, chapter, settings, job=None):
         """download all missing pages from chapter"""
 
-        print('downloading chapter: {}'.format(chapter.nbr))
+        print('downloading chapter: {} - {}'.format(chapter.nbr, chapter.url))
 
         manga_dir = os.path.join(settings.appcfg.download_dir,
                                  chapter.manga.name)
 
         chapter_dir = os.path.join(manga_dir,
-                                   settings.appcfg.chapter_fmt.format(
-                                       ch=chapter.nbr))
+                                   settings.appcfg.chapter_fmt.format(ch=chapter.nbr, nm=chapter.name))
+
+        if job.volume > 0:
+            volume_dir = os.path.join(manga_dir,
+                                      settings.appcfg.volume_dir_fmt.format(voln=job.volume, manga=chapter.manga.name))
+
+            chapter_dir = os.path.join(volume_dir,
+                                       settings.appcfg.chapter_fmt.format(
+                                           ch=chapter.nbr, nm=util.remove_invalid_path_chars(chapter.name)))
 
         if not os.path.exists(chapter_dir):
             os.makedirs(chapter_dir)
@@ -151,8 +164,12 @@ class GenericProvider(object):
             image_path = os.path.join(chapter_dir,
                                       settings.appcfg.page_fmt.format(pg=i))
 
-            self.download_image(self.get_image_url(pg), image_path)
+            if self.download_image(self.get_image_url(pg), image_path):
 
+                if job:
+                    job.chapter = chapter.nbr
+                    job.pages_downloaded += 1
+                    JobManager.instance().save_job(job)
 
     def download_image(self, url, save_path):
 

@@ -1,0 +1,3 @@
+[submodule "webui/editablegrid"]
+	path = webui/editablegrid
+	url = https://github.com/webismymind/editablegrid.git

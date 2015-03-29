@@ -15,8 +15,8 @@ class MangaReader(GenericProvider):
         super(MangaReader, self).__init__()
 
         self.chre = [
-            re.compile(r"/(?P<nbr>\d+)"),
-            re.compile(r"/chapter-(?P<nbr>\d+)")
+            re.compile(r"/(?P<nbr>\d+)$"),
+            re.compile(r"/chapter-(?P<nbr>\d+).html$")
         ]
 
     @property
@@ -48,20 +48,23 @@ class MangaReader(GenericProvider):
         if not tab:
             return []
 
-        for a in tab.find_all('a'):
-            try:
-                url = a['href']
-                # urls and paths are quite similar
-                nbr = self.extract_chapter_nbr(url)
-                cl.append(ChapterItem(
-                    name=a.text,
-                    manga=manga,
-                    nbr=nbr,
-                    provider=self,
-                    url=url))
+        for td in tab.find_all('td'):
+            for a in td.find_all('a'):
+                try:
+                    url = a['href']
+                    # urls and paths are quite similar
+                    nbr = self.extract_chapter_nbr(url)
+                    cl.append(ChapterItem(
+                        name=td.text.strip(),
+                        manga=manga,
+                        nbr=nbr,
+                        provider=self,
+                        url=url))
 
-            except Exception as e:
-                print('failed to parse', a, e)
+                except Exception as e:
+                    print('failed to parse', a, e)
+                finally:
+                    break
         return cl
 
 

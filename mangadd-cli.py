@@ -48,6 +48,7 @@ def add_job():
     url = input("manga url: ")
     cfrom = -1
     cto = -1
+    vol = -1
 
     try:
         cfrom = int(input("chapter from [first]: "))
@@ -59,10 +60,18 @@ def add_job():
     except:
         cto = -1
 
+    try:
+        vol = int(input("volume: "))
+    except:
+        vol = -1
+
     obj = {
         'url': url,
         'from': cfrom,
-        'to': cto
+        'to': cto,
+        'volume': vol,
+        'format': 'cbz',
+        'profile': 'kobo_aura_hd'
     }
 
     r = requests.post('http://localhost:8888/jobs/add', {'body': json.dumps(obj)})
