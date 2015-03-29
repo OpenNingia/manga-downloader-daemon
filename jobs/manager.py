@@ -78,6 +78,8 @@ class DownloadAndPackJobItem(JobItem):
 
     @property
     def progress(self):
+        if self.pages_count == 0:
+            return 0
         return int(self.pages_downloaded / self.pages_count * 100)
 
 

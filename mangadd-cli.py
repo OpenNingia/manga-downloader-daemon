@@ -25,7 +25,7 @@ def parse_args():
 
 
 def list_jobs():
-    r = requests.get('http://localhost:8888/jobs/list')
+    r = requests.get('http://192.168.0.15:8888/jobs/list')
     if r.status_code != 200:
         print('cannot retrieve job list', r.status_code)
         return
@@ -74,7 +74,7 @@ def add_job():
         'profile': 'kobo_aura_hd'
     }
 
-    r = requests.post('http://localhost:8888/jobs/add', {'body': json.dumps(obj)})
+    r = requests.post('http://192.168.0.15:8888/jobs/add', {'body': json.dumps(obj)})
     print(r.status_code)
 
 
@@ -90,7 +90,7 @@ def remove_job():
         'jobid': jobid
     }
 
-    r = requests.post('http://localhost:8888/jobs/del', {'body': json.dumps(obj)})
+    r = requests.post('http://192.168.0.15:8888/jobs/del', {'body': json.dumps(obj)})
     print(r.status_code)
 
 
