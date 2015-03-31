@@ -141,6 +141,7 @@ class JobListWithMetadataHandler(tornado.web.RequestHandler):
 class JobAddHandler(tornado.web.RequestHandler):
     def post(self):
 
+        print(self.request.body)
         payload = json.loads(self.get_argument('body'))
         print(payload)
 
@@ -149,7 +150,7 @@ class JobAddHandler(tornado.web.RequestHandler):
         JobManager.instance().add_job(job)
 
         resp = {'result': 'ok'}
-        self.set_header("Content-Type", "application/json")
+        self.set_header("Content-Type", "application/x-www-form-urlencoded")
         self.write(json.dumps(resp))
 
 

@@ -37,6 +37,29 @@
 			window.onload = function() {
 				set_postback_host( "{{postback_host}}" );
 			}
+
+            $(function() {
+                $('#add-job-confirm').on('click', function(e) {
+                    $('#add-job-form').submit();
+                    $('#modal-add-job').hide();
+                });
+
+                $( "#modal-add-job" ).submit(function(e) {
+                  var manga_url = $('#manga-url').val();
+                  var ch_from   = $('#manga-chapter-from').val();
+                  var ch_to     = $('#manga-chapter-to').val();
+                  var volume    = $('#manga-volume').val();
+                  var format    = $('#manga-download-format').val();
+                  var profile   = $('#manga-reader-profile').val();
+
+                  add_job(manga_url, ch_from, ch_to, volume, format, profile);
+                });
+
+                $('#bt-add-job').on('click', function(e) {
+                    $('#modal-add-job').show();
+                });
+            });
+
 		</script>
 
 	</head>
@@ -97,7 +120,7 @@
 			<div id="barchartcontent"></div>
 			<div id="piechartcontent"></div>
 
-			<a href="#modal-add-job" class="button-xlarge pure-button pure-button-primary">
+			<a href="#modal-add-job" id='bt-add-job' class="button-xlarge pure-button pure-button-primary">
                 <i class="fa fa-plus fa-lg"></i> Add</a>
             </a>
             <a href="#" class="button-error button-xlarge pure-button">
@@ -124,45 +147,52 @@
             <div class="modal-header">
               <h2>Add new job</h2>
 
-                <form class="pure-form pure-form-aligned">
+                <form id='add-job-form' class="pure-form pure-form-aligned">
                     <fieldset>
                         <div class="pure-control-group">
-                            <label for="url">URL</label>
-                            <input id="url" type="text" placeholder="http://manga/url.html">
+                            <label for="manga-url">URL</label>
+                            <input id="manga-url" type="text" placeholder="www.mangareader.net/nanatsu-no-taizai">
                         </div>
 
                         <div class="pure-control-group">
-                            <label for="from">From</label>
-                            <input id="from" type="number" placeholder="1">
+                            <label for="manga-chapter-from">Chapter From</label>
+                            <input id="manga-chapter-from" type="number" placeholder="Leave empty to start from first chapter">
                         </div>
 
                         <div class="pure-control-group">
-                            <label for="email">Email Address</label>
-                            <input id="email" type="email" placeholder="Email Address">
+                            <label for="manga-chapter-to">Chapter To</label>
+                            <input id="manga-chapter-to" type="number" placeholder="Leave empty to download till last chapter">
                         </div>
 
                         <div class="pure-control-group">
-                            <label for="foo">Supercalifragilistic Label</label>
-                            <input id="foo" type="text" placeholder="Enter something here...">
+                            <label for="manga-volume">Volume</label>
+                            <input id="manga-volume" type="number" placeholder="Leave empty if you don't need volume organization">
                         </div>
 
-                        <div class="pure-controls">
-                            <label for="cb" class="pure-checkbox">
-                                <input id="cb" type="checkbox"> I've read the terms and conditions
-                            </label>
-
-                            <button type="submit" class="pure-button pure-button-primary">Submit</button>
+                        <div class="pure-control-group">
+                            <label for="manga-download-format">Download format</label>
+                            <select id="manga-download-format">
+                                <option value='0'>Unformatted</option>
+                                <option value='1'>CBZ</option>
+                                <option value='2'>EPUB</option>
+                            </select>
                         </div>
+
+                        <div class="pure-control-group">
+                            <label for="manga-reader-profile">Download format</label>
+                            <select id="manga-reader-profile">
+                                <option>Default</option>
+                                <option>Kobo Aura HD</option>
+                            </select>
+                        </div>
+
                     </fieldset>
                 </form>
 
-              <a href="#close" class="btn-close" aria-hidden="true">×</a> <!--CHANGED TO "#close"-->
-            </div>
-            <div class="modal-body">
-              <p>One modal example here! :D</p>
+              <a href="#close" id="add-job-cancel" class="btn-close" aria-hidden="true">×</a>
             </div>
             <div class="modal-footer">
-              <a href="#close" class="btn">Nice!</a>  <!--CHANGED TO "#close"-->
+              <a href="#close" id="add-job-confirm" class="btn">Add</a>
             </div>
             </div>
           </div>

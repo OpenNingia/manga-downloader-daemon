@@ -199,3 +199,37 @@ EditableGrid.prototype.updatePaginator = function()
 	else link.css("cursor", "pointer").click(function(event) { editableGrid.lastPage(); });
 	paginator.append(link);
 };
+
+var add_job = function(manga_url, ch_from, ch_to, vol, frm, prf) {
+	console.log('add manga: ' + manga_url);
+
+	var json = {"url": manga_url, "from": ch_from, "to": ch_to,
+                "volume": vol, "format": frm, "profile": prf};
+
+	var xmlhttp;
+	if (window.XMLHttpRequest)
+	{ // code for IE7+, Firefox, Chrome, Opera, Safari
+		xmlhttp = new XMLHttpRequest();
+	}
+	else
+	{ // code for IE6, IE5
+		xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+	}
+
+	xmlhttp.onreadystatechange=function()
+	{
+		if (xmlhttp.readyState==4 && xmlhttp.status==200)
+	    {
+	    	console.log('job added');
+	    	// document.getElementById("myDiv").innerHTML=xmlhttp.responseText;
+	    }
+    }
+
+	xmlhttp.open("POST", postback + "/jobs/add" ,true);
+	xmlhttp.setRequestHeader("Content-type","application/json");
+
+    var body = "body=" + encodeURIComponent(JSON.stringify(json));
+
+	xmlhttp.send(body);
+}
+
