@@ -53,7 +53,7 @@ class IndexHandler(tornado.web.RequestHandler):
         host = self.request.host
         # port = self.request.port
 
-        pbhost = "{}://{}".format(proto, host)
+        pbhost = '{}://{}'.format(proto, host)
 
         self.render('index.html', postback_host=pbhost)
 

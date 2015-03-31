@@ -6,57 +6,36 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
 		<title>Manga Downloader Daemon WEBUI</title>
 
-		<!-- include javascript and css files for the EditableGrid library -->
+        <!-- WEB CSS -->
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+        <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.6.0/pure-min.css">
+
+        <!-- WEB JS -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+
+        <!-- STATIC CSS -->
+        <link rel="stylesheet" href="{{ static_url("editablegrid/editablegrid.css") }}" type="text/css" media="screen">
+        <link rel="stylesheet" href="{{ static_url("editablegrid/extensions/jquery/jquery-ui-1.8.16.custom.css") }}" type="text/css" media="screen">
+        <link rel="stylesheet" type="text/css" href="{{ static_url("css/webui.css") }}" media="screen"/>
+        <link rel="stylesheet" type="text/css" href="{{ static_url("css/modal.css") }}" media="screen"/>
+
+
+		<!-- STATIC JS -->
 		<script src="{{ static_url("editablegrid/editablegrid.js") }}"></script>
 		<script src="{{ static_url("editablegrid/editablegrid_utils.js") }}" ></script>
 		<script src="{{ static_url("editablegrid/editablegrid_renderers.js") }}" ></script>
 		<script src="{{ static_url("editablegrid/editablegrid_editors.js") }}" ></script>
 		<script src="{{ static_url("editablegrid/editablegrid_validators.js") }}" ></script>
-		<!-- [DO NOT DEPLOY]  <script src="editablegrid/editablegrid_renderers.js" ></script>-->
-		<!-- [DO NOT DEPLOY]  <script src="editablegrid/editablegrid_editors.js" ></script>-->
-		<!-- [DO NOT DEPLOY] <script src="editablegrid/editablegrid_validators.js" ></script>-->
-		<!-- [DO NOT DEPLOY] <script src="editablegrid/editablegrid_utils.js" ></script> -->
-		<!-- [DO NOT DEPLOY]<script src="editablegrid/editablegrid_charts.js" ></script> -->
-		<link rel="stylesheet" href="{{ static_url("editablegrid/editablegrid.css") }}" type="text/css" media="screen">
+        <script src="{{ static_url("editablegrid/extensions/jquery/jquery-ui-1.8.16.custom.min.js") }}" ></script>
+        <script src="{{ static_url("app/app.js") }}"></script>
+
 
 		<!-- include javascript and css files for jQuery, needed for the datepicker and autocomplete extensions -->
-		<script src="{{ static_url("editablegrid/extensions/jquery/jquery-1.6.4.min.js") }}" ></script>
-		<script src="{{ static_url("editablegrid/extensions/jquery/jquery-ui-1.8.16.custom.min.js") }}" ></script>
-
-		<link rel="stylesheet" href="{{ static_url("editablegrid/extensions/jquery/jquery-ui-1.8.16.custom.css") }}" type="text/css" media="screen">
-
-		<!-- include javascript and css files for the autocomplete extension -->
-		<!-- <script src="editablegrid/extensions/autocomplete/autocomplete.js" ></script> -->
-		<!-- <link rel="stylesheet" href="editablegrid/extensions/autocomplete/autocomplete.css" type="text/css" media="screen"> -->
-
-		<!-- Uncomment this if you want to use the first variant of the autocomplete instead of the official one from jQuery UI -->
-		<!--
-		<script src="editablegrid/extensions/autocomplete_variant_1/jquery.autocomplete.min.js" ></script>
-		<script src="editablegrid/extensions/autocomplete_variant_1/autocomplete.js" ></script>
-		<link rel="stylesheet" href="editablegrid/extensions/autocomplete_variant_1/jquery.autocomplete.css" type="text/css" media="screen">
-		!-->
-
-		<!-- Uncomment this if you want to use the second variant of the autocomplete instead of the official one from jQuery UI -->
-		<!--
-		<script src="editablegrid/extensions/autocomplete_variant_2/jquery.autocomplete.min.js" ></script>
-		<script src="editablegrid/extensions/autocomplete_variant_2/autocomplete.js" ></script>
-		<link rel="stylesheet" href="editablegrid/extensions/autocomplete_variant_2/jquery.autocomplete.css" type="text/css" media="screen">
-		!-->
-
-		<!-- include javascript file for the Highcharts library -->
-		<!-- <script src="editablegrid/extensions/Highcharts-4.0.4/js/highcharts.js"></script> -->
-
-		<!-- include javascript and css files for this demo -->
-
-		<script src="{{ static_url("app/app.js") }}"></script>
-		<link rel="stylesheet" type="text/css" href="{{ static_url("css/webui.css") }}" media="screen"/>
-		<link rel="stylesheet" type="text/css" href="{{ static_url("css/toolbar.css") }}" media="screen"/>
-		<link rel="stylesheet" type="text/css" href="{{ static_url("css/modal.css") }}" media="screen"/>
-		<link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.6.0/pure-min.css">
+		<!-- script src="{{ static_url("editablegrid/extensions/jquery/jquery-1.6.4.min.js") }}" ></script> -->
 
 		<script>
 			window.onload = function() {
-				set_postback_host( "'"+{{postback_host}}+"'" );
+				set_postback_host( "{{postback_host}}" );
 			}
 		</script>
 
@@ -64,21 +43,9 @@
 
 	<body>
 
-		<div class="toolbar">
-			<nav>
-				<p>Tool Bar</p>
-				<ul>
-					<li><a href="#">Add</a></li>
-					<li><a href="#">Remove</a></li>
-					<li><a href="#">Start</a></li>
-					<li><a href="#">Pause</a></li>
-					<li><a href="#">Stop</a></li>
-				</ul>
-			</nav>
-		</div>
-
 		<div id="wrap">
-		<h1>Job List</h1>
+
+    		<h1>Job List</h1>
 
 			<!-- Feedback message zone -->
 			<div id="message"></div>
@@ -130,7 +97,25 @@
 			<div id="barchartcontent"></div>
 			<div id="piechartcontent"></div>
 
-			<a href="#modal-add-job" class="btn btn-big">Add job!</a>
+			<a href="#modal-add-job" class="button-xlarge pure-button pure-button-primary">
+                <i class="fa fa-plus fa-lg"></i> Add</a>
+            </a>
+            <a href="#" class="button-error button-xlarge pure-button">
+                <i class="fa fa-trash-o fa-lg"></i> Delete</a>
+            </a>
+
+            <a href="#" class="button-error button-xlarge pure-button">
+                <i class="fa fa-stop fa-lg"></i> Stop</a>
+            </a>
+
+            <a href="#" class="button-warning button-xlarge pure-button">
+                <i class="fa fa-pause fa-lg"></i> Pause</a>
+            </a>
+
+            <a href="#" class="button-success button-xlarge pure-button">
+                <i class="fa fa-play fa-lg"></i> Start</a>
+            </a>
+
 		</div>
 
         <!-- Modal -->
