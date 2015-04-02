@@ -74,7 +74,7 @@ def add_job():
         'profile': 'kobo_aura_hd'
     }
 
-    r = requests.post('http://192.168.0.15:8888/jobs/add', {'body': json.dumps(obj)})
+    r = requests.post('http://localhost:8888/jobs/add', {'body': json.dumps(obj)})
     print(r.status_code)
 
 

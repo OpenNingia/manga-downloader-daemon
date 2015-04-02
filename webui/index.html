@@ -6,79 +6,68 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
 		<title>Manga Downloader Daemon WEBUI</title>
 
-		<!-- include javascript and css files for the EditableGrid library -->
+        <!-- WEB CSS -->
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+        <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.6.0/pure-min.css">
+
+        <!-- WEB JS -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+
+        <!-- STATIC CSS -->
+        <link rel="stylesheet" href="{{ static_url("editablegrid/editablegrid.css") }}" type="text/css" media="screen">
+        <link rel="stylesheet" href="{{ static_url("editablegrid/extensions/jquery/jquery-ui-1.8.16.custom.css") }}" type="text/css" media="screen">
+        <link rel="stylesheet" type="text/css" href="{{ static_url("css/webui.css") }}" media="screen"/>
+        <link rel="stylesheet" type="text/css" href="{{ static_url("css/modal.css") }}" media="screen"/>
+
+
+		<!-- STATIC JS -->
 		<script src="{{ static_url("editablegrid/editablegrid.js") }}"></script>
 		<script src="{{ static_url("editablegrid/editablegrid_utils.js") }}" ></script>
 		<script src="{{ static_url("editablegrid/editablegrid_renderers.js") }}" ></script>
 		<script src="{{ static_url("editablegrid/editablegrid_editors.js") }}" ></script>
 		<script src="{{ static_url("editablegrid/editablegrid_validators.js") }}" ></script>
-		<!-- [DO NOT DEPLOY]  <script src="editablegrid/editablegrid_renderers.js" ></script>-->
-		<!-- [DO NOT DEPLOY]  <script src="editablegrid/editablegrid_editors.js" ></script>-->
-		<!-- [DO NOT DEPLOY] <script src="editablegrid/editablegrid_validators.js" ></script>-->
-		<!-- [DO NOT DEPLOY] <script src="editablegrid/editablegrid_utils.js" ></script> -->
-		<!-- [DO NOT DEPLOY]<script src="editablegrid/editablegrid_charts.js" ></script> -->
-		<link rel="stylesheet" href="{{ static_url("editablegrid/editablegrid.css") }}" type="text/css" media="screen">
+        <script src="{{ static_url("editablegrid/extensions/jquery/jquery-ui-1.8.16.custom.min.js") }}" ></script>
+        <script src="{{ static_url("app/app.js") }}"></script>
+
 
 		<!-- include javascript and css files for jQuery, needed for the datepicker and autocomplete extensions -->
-		<script src="{{ static_url("editablegrid/extensions/jquery/jquery-1.6.4.min.js") }}" ></script>
-		<script src="{{ static_url("editablegrid/extensions/jquery/jquery-ui-1.8.16.custom.min.js") }}" ></script>
-
-		<link rel="stylesheet" href="{{ static_url("editablegrid/extensions/jquery/jquery-ui-1.8.16.custom.css") }}" type="text/css" media="screen">
-
-		<!-- include javascript and css files for the autocomplete extension -->
-		<!-- <script src="editablegrid/extensions/autocomplete/autocomplete.js" ></script> -->
-		<!-- <link rel="stylesheet" href="editablegrid/extensions/autocomplete/autocomplete.css" type="text/css" media="screen"> -->
-
-		<!-- Uncomment this if you want to use the first variant of the autocomplete instead of the official one from jQuery UI -->
-		<!--
-		<script src="editablegrid/extensions/autocomplete_variant_1/jquery.autocomplete.min.js" ></script>
-		<script src="editablegrid/extensions/autocomplete_variant_1/autocomplete.js" ></script>
-		<link rel="stylesheet" href="editablegrid/extensions/autocomplete_variant_1/jquery.autocomplete.css" type="text/css" media="screen">
-		!-->
-
-		<!-- Uncomment this if you want to use the second variant of the autocomplete instead of the official one from jQuery UI -->
-		<!--
-		<script src="editablegrid/extensions/autocomplete_variant_2/jquery.autocomplete.min.js" ></script>
-		<script src="editablegrid/extensions/autocomplete_variant_2/autocomplete.js" ></script>
-		<link rel="stylesheet" href="editablegrid/extensions/autocomplete_variant_2/jquery.autocomplete.css" type="text/css" media="screen">
-		!-->
-
-		<!-- include javascript file for the Highcharts library -->
-		<!-- <script src="editablegrid/extensions/Highcharts-4.0.4/js/highcharts.js"></script> -->
-
-		<!-- include javascript and css files for this demo -->
-
-		<script src="{{ static_url("app/app.js") }}"></script>
-		<link rel="stylesheet" type="text/css" href="{{ static_url("css/webui.css") }}" media="screen"/>
-		<link rel="stylesheet" type="text/css" href="{{ static_url("css/toolbar.css") }}" media="screen"/>
-		<link rel="stylesheet" type="text/css" href="{{ static_url("css/modal.css") }}" media="screen"/>
-		<link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.6.0/pure-min.css">
+		<!-- script src="{{ static_url("editablegrid/extensions/jquery/jquery-1.6.4.min.js") }}" ></script> -->
 
 		<script>
-			window.onload = function() {
-				set_postback_host( "'"+{{postback_host}}+"'" );
-			}
+            $(function() {
+
+                set_postback_host( "{{postback_host}}" );
+
+                $('#add-job-confirm').on('click', function(e) {
+                    $('#add-job-form').submit();
+                    $('#modal-add-job').hide();
+                });
+
+                $( "#modal-add-job" ).submit(function(e) {
+                  var manga_url = $('#manga-url').val();
+                  var ch_from   = $('#manga-chapter-from').val();
+                  var ch_to     = $('#manga-chapter-to').val();
+                  var volume    = $('#manga-volume').val();
+                  var format    = $('#manga-download-format').val();
+                  var profile   = $('#manga-reader-profile').val();
+
+                  add_job(manga_url, ch_from, ch_to, volume, format, profile);
+                });
+
+                $('#bt-add-job').on('click', function(e) {
+                    $('#modal-add-job').show();
+                });
+            });
+
 		</script>
 
 	</head>
 
 	<body>
 
-		<div class="toolbar">
-			<nav>
-				<p>Tool Bar</p>
-				<ul>
-					<li><a href="#">Add</a></li>
-					<li><a href="#">Remove</a></li>
-					<li><a href="#">Start</a></li>
-					<li><a href="#">Pause</a></li>
-					<li><a href="#">Stop</a></li>
-				</ul>
-			</nav>
-		</div>
-
 		<div id="wrap">
-		<h1>Job List</h1>
+
+    		<h1>Job List</h1>
 
 			<!-- Feedback message zone -->
 			<div id="message"></div>
@@ -130,7 +119,25 @@
 			<div id="barchartcontent"></div>
 			<div id="piechartcontent"></div>
 
-			<a href="#modal-add-job" class="btn btn-big">Add job!</a>
+			<a href="#modal-add-job" id='bt-add-job' class="button-xlarge pure-button pure-button-primary">
+                <i class="fa fa-plus fa-lg"></i> Add</a>
+            </a>
+            <a href="#" class="button-error button-xlarge pure-button">
+                <i class="fa fa-trash-o fa-lg"></i> Delete</a>
+            </a>
+
+            <a href="#" class="button-error button-xlarge pure-button">
+                <i class="fa fa-stop fa-lg"></i> Stop</a>
+            </a>
+
+            <a href="#" class="button-warning button-xlarge pure-button">
+                <i class="fa fa-pause fa-lg"></i> Pause</a>
+            </a>
+
+            <a href="#" class="button-success button-xlarge pure-button">
+                <i class="fa fa-play fa-lg"></i> Start</a>
+            </a>
+
 		</div>
 
         <!-- Modal -->
@@ -139,45 +146,52 @@
             <div class="modal-header">
               <h2>Add new job</h2>
 
-                <form class="pure-form pure-form-aligned">
+                <form id='add-job-form' class="pure-form pure-form-aligned">
                     <fieldset>
                         <div class="pure-control-group">
-                            <label for="url">URL</label>
-                            <input id="url" type="text" placeholder="http://manga/url.html">
+                            <label for="manga-url">URL</label>
+                            <input id="manga-url" type="text" placeholder="www.mangareader.net/nanatsu-no-taizai">
                         </div>
 
                         <div class="pure-control-group">
-                            <label for="from">From</label>
-                            <input id="from" type="number" placeholder="1">
+                            <label for="manga-chapter-from">Chapter From</label>
+                            <input id="manga-chapter-from" type="number" placeholder="Leave empty to start from first chapter">
                         </div>
 
                         <div class="pure-control-group">
-                            <label for="email">Email Address</label>
-                            <input id="email" type="email" placeholder="Email Address">
+                            <label for="manga-chapter-to">Chapter To</label>
+                            <input id="manga-chapter-to" type="number" placeholder="Leave empty to download till last chapter">
                         </div>
 
                         <div class="pure-control-group">
-                            <label for="foo">Supercalifragilistic Label</label>
-                            <input id="foo" type="text" placeholder="Enter something here...">
+                            <label for="manga-volume">Volume</label>
+                            <input id="manga-volume" type="number" placeholder="Leave empty if you don't need volume organization">
                         </div>
 
-                        <div class="pure-controls">
-                            <label for="cb" class="pure-checkbox">
-                                <input id="cb" type="checkbox"> I've read the terms and conditions
-                            </label>
-
-                            <button type="submit" class="pure-button pure-button-primary">Submit</button>
+                        <div class="pure-control-group">
+                            <label for="manga-download-format">Download format</label>
+                            <select id="manga-download-format">
+                                <option value='unformatted'>Unformatted</option>
+                                <option value='cbz'>CBZ</option>
+                                <option value='epub'>EPUB</option>
+                            </select>
                         </div>
+
+                        <div class="pure-control-group">
+                            <label for="manga-reader-profile">Reader profile</label>
+                            <select id="manga-reader-profile">
+                                <option value='default'>Default</option>
+                                <option value='kobo_aura_hd'>Kobo Aura HD</option>
+                            </select>
+                        </div>
+
                     </fieldset>
                 </form>
 
-              <a href="#close" class="btn-close" aria-hidden="true">×</a> <!--CHANGED TO "#close"-->
-            </div>
-            <div class="modal-body">
-              <p>One modal example here! :D</p>
+              <a href="#close" id="add-job-cancel" class="btn-close" aria-hidden="true">×</a>
             </div>
             <div class="modal-footer">
-              <a href="#close" class="btn">Nice!</a>  <!--CHANGED TO "#close"-->
+              <a href="#close" id="add-job-confirm" class="btn">Add</a>
             </div>
             </div>
           </div>
