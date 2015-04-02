@@ -203,6 +203,14 @@ EditableGrid.prototype.updatePaginator = function()
 var add_job = function(manga_url, ch_from, ch_to, vol, frm, prf) {
 	console.log('add manga: ' + manga_url);
 
+	if (ch_from == '')
+		ch_from = -1
+	if (ch_to == '')
+		ch_to = -1
+	if (vol == '')
+		vol = -1
+
+
 	var json = {"url": manga_url, "from": ch_from, "to": ch_to,
                 "volume": vol, "format": frm, "profile": prf};
 
@@ -225,10 +233,11 @@ var add_job = function(manga_url, ch_from, ch_to, vol, frm, prf) {
 	    }
     }
 
-	xmlhttp.open("POST", postback + "/jobs/add" ,true);
-	xmlhttp.setRequestHeader("Content-type","application/json");
-
     var body = "body=" + encodeURIComponent(JSON.stringify(json));
+
+	xmlhttp.open("POST", postback + "/jobs/add" ,true);
+
+	xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 
 	xmlhttp.send(body);
 }

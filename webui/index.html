@@ -34,11 +34,10 @@
 		<!-- script src="{{ static_url("editablegrid/extensions/jquery/jquery-1.6.4.min.js") }}" ></script> -->
 
 		<script>
-			window.onload = function() {
-				set_postback_host( "{{postback_host}}" );
-			}
-
             $(function() {
+
+                set_postback_host( "{{postback_host}}" );
+
                 $('#add-job-confirm').on('click', function(e) {
                     $('#add-job-form').submit();
                     $('#modal-add-job').hide();
@@ -172,17 +171,17 @@
                         <div class="pure-control-group">
                             <label for="manga-download-format">Download format</label>
                             <select id="manga-download-format">
-                                <option value='0'>Unformatted</option>
-                                <option value='1'>CBZ</option>
-                                <option value='2'>EPUB</option>
+                                <option value='unformatted'>Unformatted</option>
+                                <option value='cbz'>CBZ</option>
+                                <option value='epub'>EPUB</option>
                             </select>
                         </div>
 
                         <div class="pure-control-group">
-                            <label for="manga-reader-profile">Download format</label>
+                            <label for="manga-reader-profile">Reader profile</label>
                             <select id="manga-reader-profile">
-                                <option>Default</option>
-                                <option>Kobo Aura HD</option>
+                                <option value='default'>Default</option>
+                                <option value='kobo_aura_hd'>Kobo Aura HD</option>
                             </select>
                         </div>
 
