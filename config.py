@@ -22,6 +22,12 @@ class SettingsReader(object):
             if fn == 'config.json':
                 self.appcfg = AppSettingsReader(jf)
 
+        if not self.appcfg:
+            # create default config
+            self.appcfg = AppSettingsReader(
+                os.path.join(self.appdir, 'config.json'))
+            self.appcfg.save()
+
         #for jf in glob.glob(self.appdir + "/manga/*.json"):
         #    fn = os.path.basename(jf)
         #    print('parsing manga config file', jf)
@@ -39,31 +45,47 @@ class AppSettingsReader(object):
     """
 
     def __init__(self, location):
-        if not os.path.exists(location):
-            raise Exception('app config not found')
+
+        self.location = location
+
+        #if not os.path.exists(location):
+        #    raise Exception('app config not found')
 
         self.download_dir = os.path.expanduser("~/.mangadd/downloads")
         self.chapter_fmt = "{ch:05G} - {nm}"
         self.page_fmt = "{pg:05G}"
         self.volume_dir_fmt = "[VOL {voln:03G}] {manga}"
 
-        with open(location, 'rt') as fp:
-            jd = json.load(fp)
+        if os.path.exists(location):
+            with open(location, 'rt') as fp:
+                jd = json.load(fp)
 
-            if 'download_dir' in jd:
-                self.download_dir = jd['download_dir']
-            if 'chapter_fmt' in jd:
-                self.chapter_fmt = jd['chapter_fmt']
-            if 'page_fmt' in jd:
-                self.page_fmt = jd['page_fmt']
-            if 'volume_dir_fmt' in jd:
-                self.volume_dir_fmt = jd['volume_dir_fmt']
+                if 'download_dir' in jd:
+                    self.download_dir = jd['download_dir']
+                if 'chapter_fmt' in jd:
+                    self.chapter_fmt = jd['chapter_fmt']
+                if 'page_fmt' in jd:
+                    self.page_fmt = jd['page_fmt']
+                if 'volume_dir_fmt' in jd:
+                    self.volume_dir_fmt = jd['volume_dir_fmt']
 
         # print('download dir', self.download_dir)
         # print('chapter format', self.chapter_fmt,
         #      'example. ch 1', self.chapter_fmt.format(ch=1, nm='intro'))
         # print('volume format', self.volume_dir_fmt,
         #      'example. vol 1', self.volume_dir_fmt.format(voln=1, manga='Naruto'))
+
+    def save(self):
+
+        obj = {
+            'download_dir': self.download_dir,
+            'chapter_fmt': self.chapter_fmt,
+            'page_fmt': self.page_fmt,
+            'volume_dir_fmt': self.volume_dir_fmt
+        }
+
+        with open(self.location, 'wt') as fp:
+            json.dump(obj, fp)
 
 
 class MangaSettingsReader(object):

@@ -1,6 +1,8 @@
 import os
+import sys
 import json
 import signal
+
 from tornado.ioloop import IOLoop, PeriodicCallback
 
 import tornado.web
@@ -9,6 +11,63 @@ import tornado.httpserver
 from jobs.manager import JobManager, JobItem, DownloadAndPackJobItem
 
 is_closing = False
+
+# logging
+import logging
+import logging.handlers
+
+__version__ = "0.1"
+
+APP_BRIEF = "mangadd"
+APP_NAME  = "manga-downloader-daemon"
+APP_DESC  = "Manga Downloader Daemon"
+APP_VER   = __version__
+APP_ORG   = "openningia.org"
+
+def we_are_frozen():
+    """Returns whether we are frozen via py2exe.
+    This will affect how we find out where we are located."""
+
+    return hasattr(sys, "frozen")
+
+def module_path():
+    """ This will get us the program's directory,
+    even if we are frozen using py2exe"""
+
+    if we_are_frozen():
+        return os.path.dirname(sys.executable)
+
+    return os.path.dirname(__file__)
+
+SCRIPT_PATH     = module_path()
+LOG_DIR         = os.path.join(SCRIPT_PATH, 'logs')
+
+def log_setup(base_path, base_name):
+    # check base path
+    if not os.path.exists(base_path):
+        os.makedirs(base_path)
+
+    # set up logging to file
+
+    root = logging.getLogger('')
+
+    # set the level of the root logger
+    root.setLevel(logging.DEBUG)
+
+    # define the file formatter
+    file_fmt = logging.Formatter('%(asctime)s %(name)-12s ' +
+                                 '%(levelname)-8s %(message)s')
+
+    # define log rotation
+    rotation = logging.handlers.TimedRotatingFileHandler(
+                filename=os.path.join(base_path, base_name),
+                when='midnight',
+                backupCount = 15)
+
+    rotation.setFormatter(file_fmt)
+
+    # add the handlers to the root logger
+    logging.getLogger('').addHandler(rotation)
 
 
 def signal_handler(signum, frame):
@@ -30,22 +89,6 @@ def job_run():
     try_exit()
 
 
-def job_status_to_string(stat):
-    if stat == JobItem.JOB_STATUS_STOPPED:
-        return "Stopped"
-    if stat == JobItem.JOB_STATUS_PAUSED:
-        return "Paused"
-    if stat == JobItem.JOB_STATUS_QUEUED:
-        return "Queued"
-    if stat == JobItem.JOB_STATUS_RUNNING:
-        return "Downloading"
-    if stat == JobItem.JOB_STATUS_COMPLETED:
-        return "Completed"
-    if stat == JobItem.JOB_STATUS_ERROR:
-        return "Error"
-    return "Unknown"
-
-
 class IndexHandler(tornado.web.RequestHandler):
     def get(self):
 
@@ -56,6 +99,24 @@ class IndexHandler(tornado.web.RequestHandler):
         pbhost = '{}://{}'.format(proto, host)
 
         self.render('index.html', postback_host=pbhost)
+
+
+class LogHandler(tornado.web.RequestHandler):
+    def post(self):
+        # print(self.request.body)
+
+        log = logging.getLogger("app")
+
+        #payload = json.loads(self.get_argument('body'))
+        payload = json.loads(self.request.body.decode('utf-8'))
+        #print('payload', payload)
+
+        record = logging.makeLogRecord(payload)
+        # print('record', record)
+        log.handle(record)
+
+        self.set_status(204)
+        #self.finish()
 
 
 class JobListHandler(tornado.web.RequestHandler):
@@ -78,8 +139,8 @@ class JobListWithMetadataHandler(tornado.web.RequestHandler):
         for i, d in enumerate([x.json() for x in
                                JobManager.instance().joblist]):
 
-            if 'status' in d:
-                d['status'] = job_status_to_string(d['status'])
+            #if 'status' in d:
+            #    d['status'] = job_status_to_string(d['status'])
 
             data.append({
                 "id": i+1,
@@ -91,8 +152,21 @@ class JobListWithMetadataHandler(tornado.web.RequestHandler):
                 {"name": "jobid", "label": "JOBID",
                  "datatype": "integer", "editable": False},
 
+                #{"name": "status", "label": "STATUS",
+                # "datatype": "string", "editable": False},
+
+
                 {"name": "status", "label": "STATUS",
-                 "datatype": "string", "editable": False},
+                 "datatype": "integer", "editable": False, "values":
+                    {
+                        JobItem.JOB_STATUS_STOPPED: "Stopped",
+                        JobItem.JOB_STATUS_PAUSED: "Paused",
+                        JobItem.JOB_STATUS_QUEUED: "Queued",
+                        JobItem.JOB_STATUS_RUNNING: "Downloading",
+                        JobItem.JOB_STATUS_COMPLETED: "Completed",
+                        JobItem.JOB_STATUS_ERROR: "Error"
+                    }},
+
 
                 {"name": "from", "label": "FROM CHAPTER",
                  "datatype": "integer", "editable": False},
@@ -141,9 +215,10 @@ class JobListWithMetadataHandler(tornado.web.RequestHandler):
 class JobAddHandler(tornado.web.RequestHandler):
     def post(self):
 
-        print(self.request.body)
+        log = logging.getLogger('web')
+
         payload = json.loads(self.get_argument('body'))
-        print(payload)
+        log.debug('addjob request: {}'.format(payload))
 
         job = DownloadAndPackJobItem()
         job.from_json(payload)
@@ -157,8 +232,10 @@ class JobAddHandler(tornado.web.RequestHandler):
 class JobDelHandler(tornado.web.RequestHandler):
     def post(self):
 
+        log = logging.getLogger('web')
+
         payload = json.loads(self.get_argument('body'))
-        print(payload)
+        log.debug('deljob request: {}'.format(payload))
 
         jobid = int(payload['jobid'])
         resp = {'result': 'ok'}
@@ -176,7 +253,8 @@ class Application(tornado.web.Application):
             tornado.web.url(r"/jobs/list", JobListHandler),
             tornado.web.url(r"/jobs/listex", JobListWithMetadataHandler),
             tornado.web.url(r"/jobs/add", JobAddHandler),
-            tornado.web.url(r"/jobs/del", JobDelHandler)]
+            tornado.web.url(r"/jobs/del", JobDelHandler),
+            tornado.web.url(r"/log/write", LogHandler)]
 
         settings = {
             "template_path": os.path.join(os.path.dirname(__file__), "webui"),
@@ -194,6 +272,13 @@ def make_app():
 
 
 def main():
+
+    try:
+        os.makedirs(LOG_DIR)
+    except:
+        print('cannot create log directory')
+    finally:
+        log_setup(LOG_DIR, "{}.web.log".format(APP_BRIEF))
 
     # resume jobs
     JobManager.instance().load_jobs()

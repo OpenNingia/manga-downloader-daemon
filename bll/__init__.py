@@ -7,6 +7,9 @@ import util
 import config
 import providers
 
+# logging
+import logging
+import logging.handlers
 
 def create_manga(args):
     """create directory and manifest for a new download"""
@@ -130,11 +133,14 @@ def create_job_resume_info(manga, job):
 
 def download_manga_job(job):
 
+    log = util.setup_http_logger('jobs.bll')
+
     # search manga provider
     providers.init_providers()
     prov = providers.by_url(job.manga_url)
 
     if not prov:
+        log.error('manga url not supported: {}'.format(job.manga_url))
         return False
 
     # remove provider root uri
@@ -147,6 +153,7 @@ def download_manga_job(job):
         prov.update_manga_list()
         online_manga = [x for x in prov.mangalist if x.url == rel_uri]
         if not len(online_manga):
+            log.error('manga not found on provider: {}'.format(rel_uri))
             return False
 
     online_manga = online_manga[0]
@@ -168,6 +175,9 @@ def download_manga_job(job):
         job.pages_downloaded = sum([len(x.pages) for x in already_downloaded])
     else:
         job.pages_downloaded = 0
+
+    log.info('pages to download: {}'.format(job.pages_count))
+    log.info('pages already downloaded: {}'.format(job.pages_downloaded))
 
     cfg = config.SettingsReader()
 

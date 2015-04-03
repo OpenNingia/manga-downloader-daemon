@@ -201,7 +201,6 @@ EditableGrid.prototype.updatePaginator = function()
 };
 
 var add_job = function(manga_url, ch_from, ch_to, vol, frm, prf) {
-	console.log('add manga: ' + manga_url);
 
 	if (ch_from == '')
 		ch_from = -1
@@ -210,6 +209,10 @@ var add_job = function(manga_url, ch_from, ch_to, vol, frm, prf) {
 	if (vol == '')
 		vol = -1
 
+	if (manga_url.indexOf('http://') != 0 && manga_url.indexOf('https://') != 0)
+		manga_url = 'http://' + manga_url
+
+	console.log('adding manga: ' + manga_url);
 
 	var json = {"url": manga_url, "from": ch_from, "to": ch_to,
                 "volume": vol, "format": frm, "profile": prf};
@@ -228,7 +231,7 @@ var add_job = function(manga_url, ch_from, ch_to, vol, frm, prf) {
 	{
 		if (xmlhttp.readyState==4 && xmlhttp.status==200)
 	    {
-	    	console.log('job added');
+	    	console.log('job added succesfully');
 	    	// document.getElementById("myDiv").innerHTML=xmlhttp.responseText;
 	    }
     }

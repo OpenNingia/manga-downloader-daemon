@@ -144,7 +144,7 @@ class GenericProvider(object):
                                  chapter.manga.name)
 
         chapter_dir = os.path.join(manga_dir,
-                                   settings.appcfg.chapter_fmt.format(ch=chapter.nbr, nm=chapter.name))
+                                   settings.appcfg.chapter_fmt.format(ch=chapter.nbr, nm=util.remove_invalid_path_chars(chapter.name)))
 
         if job.volume > 0:
             volume_dir = os.path.join(manga_dir,

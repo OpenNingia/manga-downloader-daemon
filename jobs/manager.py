@@ -5,9 +5,14 @@ import os
 import config
 from util.singleton import Singleton
 
+import util
 import glob
 import json
 import multiprocessing as mp
+
+# logging
+import logging
+import logging.handlers
 
 
 class JobItem(object):
@@ -126,15 +131,21 @@ class DownloadAndPackJobItem(JobItem):
 def run_job(queue):
     import bll
 
+    log = util.setup_http_logger('job.runner')
+
     j = queue.get()
+
+    log.info('job {} status. {} => {} (RUNNING)'.format(j.jobid, j.status, JobItem.JOB_STATUS_RUNNING))
     j.status = JobItem.JOB_STATUS_RUNNING
+
     try:
         bll.download_manga_job(j)
+        log.info('job {} status. {} => {} (COMPLETED)'.format(j.jobid, j.status, JobItem.JOB_STATUS_COMPLETED))
         j.status = JobItem.JOB_STATUS_COMPLETED
-        print('job {} completed'.format(j.jobid))
     except Exception as e:
+        log.info('job {} status. {} => {} (ERROR)'.format(j.jobid, j.status, JobItem.JOB_STATUS_COMPLETED))
         j.status = JobItem.JOB_STATUS_ERROR
-        print('job {} error'.format(j.jobid), e)
+        log.exception(e)
 
     JobManager.instance().save_job(j)
 
@@ -177,6 +188,8 @@ class JobManager(object):
 
     def run_once(self):
 
+        log = util.setup_http_logger('job.manager')
+
         self.check_procs()
 
         self.reload_job_status()
@@ -189,8 +202,8 @@ class JobManager(object):
             p.daemon = True
             p.start()
             self.procs.append(p)
-        except:
-            return
+        except Exception as e:
+            log.exception(e)
 
     def reload_job_status(self):
         cfg = config.SettingsReader()
