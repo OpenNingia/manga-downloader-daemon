@@ -1,0 +1,203 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>Manga Downloader Daemon WEBUI</title>
+
+        <!-- WEB CSS -->
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+        <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.6.0/pure-min.css">
+
+        <!-- WEB JS -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+
+        <!-- STATIC CSS -->
+        <link rel="stylesheet" href="{{ static_url("editablegrid/editablegrid.css") }}" type="text/css" media="screen">
+        <link rel="stylesheet" href="{{ static_url("editablegrid/extensions/jquery/jquery-ui-1.8.16.custom.css") }}" type="text/css" media="screen">
+        <link rel="stylesheet" type="text/css" href="{{ static_url("css/webui.css") }}" media="screen"/>
+        <link rel="stylesheet" type="text/css" href="{{ static_url("css/modal.css") }}" media="screen"/>
+
+
+		<!-- STATIC JS -->
+		<script src="{{ static_url("editablegrid/editablegrid.js") }}"></script>
+		<script src="{{ static_url("editablegrid/editablegrid_utils.js") }}" ></script>
+		<script src="{{ static_url("editablegrid/editablegrid_renderers.js") }}" ></script>
+		<script src="{{ static_url("editablegrid/editablegrid_editors.js") }}" ></script>
+		<script src="{{ static_url("editablegrid/editablegrid_validators.js") }}" ></script>
+        <script src="{{ static_url("editablegrid/extensions/jquery/jquery-ui-1.8.16.custom.min.js") }}" ></script>
+        <script src="{{ static_url("app/app.js") }}"></script>
+
+
+		<!-- include javascript and css files for jQuery, needed for the datepicker and autocomplete extensions -->
+		<!-- script src="{{ static_url("editablegrid/extensions/jquery/jquery-1.6.4.min.js") }}" ></script> -->
+
+		<script>
+            $(function() {
+
+                set_postback_host( "{{postback_host}}" );
+
+                $('#add-job-confirm').on('click', function(e) {
+                    $('#add-job-form').submit();
+                    $('#modal-add-job').hide();
+                });
+
+                $( "#modal-add-job" ).submit(function(e) {
+                  var manga_url = $('#manga-url').val();
+                  var ch_from   = $('#manga-chapter-from').val();
+                  var ch_to     = $('#manga-chapter-to').val();
+                  var volume    = $('#manga-volume').val();
+                  var format    = $('#manga-download-format').val();
+                  var profile   = $('#manga-reader-profile').val();
+
+                  add_job(manga_url, ch_from, ch_to, volume, format, profile);
+                });
+
+                $('#bt-add-job').on('click', function(e) {
+                    $('#modal-add-job').show();
+                });
+            });
+
+		</script>
+
+	</head>
+
+	<body>
+
+		<div id="wrap">
+
+    		<h1>Job List</h1>
+
+			<!-- Feedback message zone -->
+			<div id="message"></div>
+
+			<!--  Number of rows per page -->
+			<div id="pagecontrol">
+				<label for="pagecontrol">Rows per page: </label>
+				<select id="pagesize" name="pagesize">
+					<option value="5">5</option>
+					<option value="10">10</option>
+					<option value="15">15</option>
+					<option value="20">20</option>
+					<option value="25">25</option>
+					<option value="30">30</option>
+					<option value="40">40</option>
+					<option value="50">50</option>
+				</select>
+				&nbsp;&nbsp;
+
+				<!--  Refresh interval -->
+				<label for="refresh">Refresh interval:</label>
+				<select id="refresh" name="refresh">
+					<option value="5">5 sec.</option>
+					<option value="10">10 sec.</option>
+					<option value="15">15 sec.</option>
+					<option value="20">20 sec.</option>
+					<option value="25">25 sec.</option>
+					<option value="30">30 sec.</option>
+					<option value="40">40 sec.</option>
+					<option value="50">50 sec.</option>
+					<option value="50">60 sec.</option>
+				</select>
+			</div>
+
+			<!-- Grid filter -->
+			<label for="filter">Filter :</label>
+			<input type="text" id="filter"/>
+
+			<!-- Grid contents -->
+			<div id="tablecontent"></div>
+
+			<!-- Paginator control -->
+			<div id="paginator"></div>
+
+			<!-- Edition zone (to demonstrate the "fixed" editor mode) -->
+			<div id="edition"></div>
+
+			<!-- Charts zone -->
+			<div id="barchartcontent"></div>
+			<div id="piechartcontent"></div>
+
+			<a href="#modal-add-job" id='bt-add-job' class="button-xlarge pure-button pure-button-primary">
+                <i class="fa fa-plus fa-lg"></i> Add</a>
+            </a>
+            <a href="#" class="button-error button-xlarge pure-button">
+                <i class="fa fa-trash-o fa-lg"></i> Delete</a>
+            </a>
+
+            <a href="#" class="button-error button-xlarge pure-button">
+                <i class="fa fa-stop fa-lg"></i> Stop</a>
+            </a>
+
+            <a href="#" class="button-warning button-xlarge pure-button">
+                <i class="fa fa-pause fa-lg"></i> Pause</a>
+            </a>
+
+            <a href="#" class="button-success button-xlarge pure-button">
+                <i class="fa fa-play fa-lg"></i> Start</a>
+            </a>
+
+		</div>
+
+        <!-- Modal -->
+        <div class="modal" id="modal-add-job" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-header">
+              <h2>Add new job</h2>
+
+                <form id='add-job-form' class="pure-form pure-form-aligned">
+                    <fieldset>
+                        <div class="pure-control-group">
+                            <label for="manga-url">URL</label>
+                            <input id="manga-url" type="text" placeholder="www.mangareader.net/nanatsu-no-taizai">
+                        </div>
+
+                        <div class="pure-control-group">
+                            <label for="manga-chapter-from">Chapter From</label>
+                            <input id="manga-chapter-from" type="number" placeholder="Leave empty to start from first chapter">
+                        </div>
+
+                        <div class="pure-control-group">
+                            <label for="manga-chapter-to">Chapter To</label>
+                            <input id="manga-chapter-to" type="number" placeholder="Leave empty to download till last chapter">
+                        </div>
+
+                        <div class="pure-control-group">
+                            <label for="manga-volume">Volume</label>
+                            <input id="manga-volume" type="number" placeholder="Leave empty if you don't need volume organization">
+                        </div>
+
+                        <div class="pure-control-group">
+                            <label for="manga-download-format">Download format</label>
+                            <select id="manga-download-format">
+                                <option value='unformatted'>Unformatted</option>
+                                <option value='cbz'>CBZ</option>
+                                <option value='epub'>EPUB</option>
+                            </select>
+                        </div>
+
+                        <div class="pure-control-group">
+                            <label for="manga-reader-profile">Reader profile</label>
+                            <select id="manga-reader-profile">
+                                <option value='default'>Default</option>
+                                <option value='kobo_aura_hd'>Kobo Aura HD</option>
+                            </select>
+                        </div>
+
+                    </fieldset>
+                </form>
+
+              <a href="#close" id="add-job-cancel" class="btn-close" aria-hidden="true">×</a>
+            </div>
+            <div class="modal-footer">
+              <a href="#close" id="add-job-confirm" class="btn">Add</a>
+            </div>
+            </div>
+          </div>
+        </div>
+        <!-- /Modal -->
+
+	</body>
+
+</html>
