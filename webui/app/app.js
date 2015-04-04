@@ -86,8 +86,8 @@ EditableGrid.prototype.initializeGrid = function()
 		// tableSorted = function() { this.renderCharts(); };
 
 		rowSelected = function(oldRowIndex, newRowIndex) {
-			// if (oldRowIndex < 0) displayMessage("Selected row '" + this.getRowId(newRowIndex) + "'");
-			// else displayMessage("Selected row has changed from '" + this.getRowId(oldRowIndex) + "' to '" + this.getRowId(newRowIndex) + "'");
+			if (oldRowIndex < 0) displayMessage("Selected row '" + this.getRowId(newRowIndex) + "'");
+			else displayMessage("Selected row has changed from '" + this.getRowId(oldRowIndex) + "' to '" + this.getRowId(newRowIndex) + "'");
 		};
 
 		rowRemoved = function(oldRowIndex, rowId) {

@@ -195,11 +195,17 @@ class JobListWithMetadataHandler(tornado.web.RequestHandler):
                 {"name": "progress", "label": "PROGRESS",
                  "datatype": "integer", "editable": False},
 
-                {"name": "pages_downloaded", "label": "DOWNLOADED PAGES",
+                {"name": "pages_downloaded", "label": "DOWNLOADED",
                  "datatype": "integer", "editable": False},
 
-                {"name": "pages_count", "label": "TOTAL PAGES",
+                {"name": "pages_count", "label": "TOTAL",
                  "datatype": "integer", "editable": False},
+
+                {"name": "pages_per_second", "label": "PAGES/SEC",
+                 "datatype": "double(p/s,2)", "editable": False},
+
+                {"name": "download_eta", "label": "DOWNLOAD ETA",
+                 "datatype": "string", "editable": False},
 
                 {"name": "url", "label": "URL",
                  "datatype": "string", "editable": False}
