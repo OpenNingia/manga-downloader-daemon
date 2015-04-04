@@ -77,6 +77,8 @@ class DownloadAndPackJobItem(JobItem):
         self.volume = -1
         self.pages_count = 0
         self.pages_downloaded = 0
+        self.pages_per_second = 0
+        self.download_eta = 0
 
         self.profile = 'kobo_aura_hd'
         self.format = 'cbz'
@@ -109,6 +111,10 @@ class DownloadAndPackJobItem(JobItem):
             self.pages_count = int(obj['pages_count'])
         if 'pages_downloaded' in obj:
             self.pages_downloaded = int(obj['pages_downloaded'])
+        if 'pages_per_second' in obj:
+            self.pages_per_second = float(obj['pages_per_second'])
+        if 'download_eta' in obj:
+            self.download_eta = obj['download_eta']
 
         return self
 
@@ -124,6 +130,8 @@ class DownloadAndPackJobItem(JobItem):
         ret['chapter'] = self.chapter
         ret['pages_count'] = self.pages_count
         ret['pages_downloaded'] = self.pages_downloaded
+        ret['pages_per_second'] = self.pages_per_second
+        ret['download_eta'] = self.download_eta
 
         return ret
 

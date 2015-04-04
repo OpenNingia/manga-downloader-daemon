@@ -68,16 +68,24 @@ class DownloadProfiler(object):
         self.time = None
         self.end_time = None
         self.downloaded = 0
+        self.pages_downloaded = 0
+        self.started = False
 
     def begin(self):
         self.time = time.clock()
         self.downloaded = 0
+        self.pages_downloaded = 0
+        self.started = True
 
     def end(self):
         self.end_time = time.clock()
+        self.started = False
 
     def add(self, count):
         self.downloaded += count
+
+    def add_page(self):
+        self.pages_downloaded += 1
 
     def bytes_per_seconds(self, partial=False):
         elapsed = 0
@@ -89,6 +97,17 @@ class DownloadProfiler(object):
         if elapsed == 0:
             return 0
         return self.downloaded / elapsed
+
+    def pages_per_second(self, partial=False):
+        elapsed = 0
+        if partial:
+            elapsed = time.clock() - self.time
+        else:
+            elapsed = self.end_time - self.time
+
+        if elapsed == 0:
+            return 0
+        return self.pages_downloaded / elapsed
 
 
 class GenericProvider(object):
@@ -129,6 +148,21 @@ class GenericProvider(object):
         pass
 
     # COMMON
+
+    def format_download_eta(self, eta):
+
+        # absolute values
+        days = int(eta/86400)
+        hours = int(eta / 3600)
+        minutes = int(eta/60)
+
+        seconds = int(eta-(minutes*60))
+        minutes -= (hours*60)
+        hours -= (days*24)
+
+        return "{}d {}h {}m {}s".format(days, hours, minutes, seconds)
+
+
     def download_manga(self, manga, settings):
         """download all missing chapters"""
 
@@ -157,6 +191,9 @@ class GenericProvider(object):
         if not os.path.exists(chapter_dir):
             os.makedirs(chapter_dir)
 
+        if not self.profiler.started:
+            self.profiler.begin()
+
         for i, pg in enumerate(chapter.pages):
 
             self.progress_text = 'page {} of {}'.format(i, len(chapter.pages))
@@ -164,12 +201,21 @@ class GenericProvider(object):
             image_path = os.path.join(chapter_dir,
                                       settings.appcfg.page_fmt.format(pg=i))
 
-            if self.download_image(self.get_image_url(pg), image_path):
+            # todo. how to handle failure? failure should not be an option!!!
+            self.download_image(self.get_image_url(pg), image_path)
 
-                if job:
-                    job.chapter = chapter.nbr
-                    job.pages_downloaded += 1
-                    JobManager.instance().save_job(job)
+            if job:
+                job.chapter = chapter.nbr
+                job.pages_downloaded += 1
+                job.pages_per_second = self.profiler.pages_per_second(True)
+                if job.pages_per_second != 0:
+                    eta = ((
+                        job.pages_count-job.pages_downloaded)
+                        / job.pages_per_second)
+                    job.download_eta = self.format_download_eta(eta)
+
+                JobManager.instance().save_job(job)
+
 
     def download_image(self, url, save_path):
 
@@ -197,22 +243,12 @@ class GenericProvider(object):
                     except:
                         pbar = None
 
-                    self.profiler.begin()
-
                     with open(image_downloading_path, 'wb') as f:
                         for chunk in r.iter_content():
                             f.write(chunk)
-                            self.profiler.add(len(chunk))
 
-                            #sys.stdout.write(
-                            #    '{} KB/s\r'.format(
-                            #        int(self.profiler.bytes_per_seconds(True)/1024)))
                             if pbar:
                                 pbar.update(len(chunk))
-
-                            #sys.stdout.flush()
-
-                    self.profiler.end()
 
                     # if image is not corrupted
                     # remove downloading extension
@@ -230,8 +266,9 @@ class GenericProvider(object):
 
             retries += 1
 
-        #print('downloaded page: {}, speed: {:G} Kb/s'.format(url,
-        #      self.profiler.bytes_per_seconds()/1024))
+        # only add actually downloaded page to the profiler
+        self.profiler.add_page()
+
         return True
 
     def update_manga_list(self):
