@@ -191,7 +191,7 @@ class GenericProvider(object):
         if not os.path.exists(chapter_dir):
             os.makedirs(chapter_dir)
 
-        if not self.profiler.started():
+        if not self.profiler.started:
             self.profiler.begin()
 
         for i, pg in enumerate(chapter.pages):
@@ -215,8 +215,6 @@ class GenericProvider(object):
                         job.pages_count-job.pages_downloaded)
                         / job.pages_per_second)
                     job.download_eta = self.format_download_eta(eta)
-
-                print('pages per second', job.pages_per_second)
 
                 JobManager.instance().save_job(job)
 
