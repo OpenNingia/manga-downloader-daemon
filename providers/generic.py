@@ -204,8 +204,6 @@ class GenericProvider(object):
             # todo. how to handle failure? failure should not be an option!!!
             self.download_image(self.get_image_url(pg), image_path)
 
-            self.profiler.add_page()
-
             if job:
                 job.chapter = chapter.nbr
                 job.pages_downloaded += 1
@@ -267,6 +265,9 @@ class GenericProvider(object):
                 return False
 
             retries += 1
+
+        # only add actually downloaded page to the profiler
+        self.profiler.add_page()
 
         return True
 
